@@ -1,0 +1,112 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="row-fluid">
+        <div class="span12">
+            <div>
+                <img alt="140x140" style="margin: 0 auto;"
+                     src="{% static 'website/img/videobkgpic__1920x650.jpg' %}"/>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="row-fluid" style="width:100%; position: absolute;top: 200px;justify-content:center; display:flex;">
+
+        <div style="float: left;width:500px;height:300px;border: 1px solid #0B4B94;text-align:center;margin: auto;background: white"
+             id="areashow">
+            <img alt="140x140" src="{% static image %}" style="margin: 0 auto;display:none;" id="image" class="expand"/>
+        </div>
+
+        <div id="outerdiv"
+             style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+            <div id="innerdiv" style="position:absolute;">
+                <img id="bigimg" style="border:5px solid #fff;" src=""/>
+            </div>
+        </div>
+
+        <div style="float: left;width:500px;height:300px;border: 1px solid #0B4B94;text-align:center;margin: auto;background: white"
+             id="areaclick">
+            <form action="../recognition/" method="post" enctype="multipart/form-data" id="xls">
+                <input type="file" name="file" onchange="submitform()" id="inputfile" style="display: none">
+
+            </form>
+
+            <img alt="140x140" style="margin: 0 auto;height: 70px;padding-top: 80px"
+                 src="{% static 'website/img/upload.png' %}"/>
+            <div style="color: #0B4B94;font-size: 24px;padding-top: 10px">选择图片</div>
+
+
+        </div>
+        <div style="float: left;width:500px;height:300px;border: 1px solid #0B4B94;text-align:center;margin: auto;background: white"
+             id="arearesult">
+            <div style="color: red;font-size: 18px;padding: 50px 10px 50px 10px;word-wrap: break-word;text-align:left;"
+                 id="msg">{{ msg }}</div>
+        </div>
+
+    </div>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript">
+        function submitform() {
+            $("#xls").submit()
+        }
+
+        $("#areaclick").on("click", function () {
+            document.getElementById("inputfile").click()
+        });
+
+        var obj = $('#msg');
+        if ($.trim(obj.html())) {
+            $("#image").attr({"style": "display:block;"});
+
+        }
+
+        $(function () {
+            $(".expand").click(function () {
+                var _this = $(this);//将当前的pimg元素作为_this传入函数
+                imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
+            });
+        });
+
+        function imgShow(outerdiv, innerdiv, bigimg, _this) {
+            var src = _this.attr("src");//获取当前点击的pimg元素中的src属性
+            $(bigimg).attr("src", src);//设置#bigimg元素的src属性
+
+            /*获取当前点击图片的真实大小，并显示弹出层及大图*/
+            $("<img/>").attr("src", src).load(function () {
+                var windowW = $(window).width();//获取当前窗口宽度
+                var windowH = $(window).height();//获取当前窗口高度
+                var realWidth = this.width;//获取图片真实宽度
+                var realHeight = this.height;//获取图片真实高度
+                var imgWidth, imgHeight;
+                var scale = 0.8;//缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放
+
+                if (realHeight > windowH * scale) {//判断图片高度
+                    imgHeight = windowH * scale;//如大于窗口高度，图片高度进行缩放
+                    imgWidth = imgHeight / realHeight * realWidth;//等比例缩放宽度
+                    if (imgWidth > windowW * scale) {//如宽度扔大于窗口宽度
+                        imgWidth = windowW * scale;//再对宽度进行缩放
+                    }
+                } else if (realWidth > windowW * scale) {//如图片高度合适，判断图片宽度
+                    imgWidth = windowW * scale;//如大于窗口宽度，图片宽度进行缩放
+                    imgHeight = imgWidth / realWidth * realHeight;//等比例缩放高度
+                } else {//如果图片真实高度和宽度都符合要求，高宽不变
+                    imgWidth = realWidth;
+                    imgHeight = realHeight;
+                }
+                $(bigimg).css("width", imgWidth);//以最终的宽度对图片缩放
+
+                var w = (windowW - imgWidth) / 2;//计算图片与窗口左边距
+                var h = (windowH - imgHeight) / 2;//计算图片与窗口上边距
+                $(innerdiv).css({"top": h, "left": w});//设置#innerdiv的top和left属性
+                $(outerdiv).fadeIn("fast");//淡入显示#outerdiv及.pimg
+            });
+
+            $(outerdiv).click(function () {//再次点击淡出消失弹出层
+                $(this).fadeOut("fast");
+            });
+        }
+
+    </script>
+{% endblock %}

@@ -1,0 +1,10 @@
+# Environment type, could be "testing", "staging" or "production".
+env: staging
+
+service:
+    port: 8888
+    host: 0.0.0.0
+
+python_env:
+    bin: "python"
+
